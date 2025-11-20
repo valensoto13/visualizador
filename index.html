@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>Visualizador simple - Algoritmos de ordenamiento</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <style>
+    /* ---------- PALETA Y VARIABLES (MODO CLARO) ---------- */
+    :root {
+      --bg-main: radial-gradient(circle at top, #e5f0ff 0, #eef2ff 40%, #f9fafb 100%);
+      --bg-card: #ffffff;
+      --bg-card-soft: #f9fafb;
+      --border-soft: #e5e7eb;
+      --text-primary: #0f172a;
+      --text-muted: #6b7280;
+      --control-bg: #f9fafb;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.12);
+      --bar-color: #3b82f6;
+      --highlight-active: #f97316;
+      --highlight-swap: #10b981;
+      --btn-play: #16a34a;
+      --btn-pause: #ea580c;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Arial, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ---------- CONTENEDOR PRINCIPAL ---------- */
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 22px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app::before,
+    .app::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(35px);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .app::before {
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(59,130,246,0.2), transparent 60%);
+      top: -70px;
+      right: -30px;
+    }
+    .app::after {
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(56,189,248,0.18), transparent 60%);
+      bottom: -90px;
+      left: -40px;
+    }
+
+    .app-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ---------- HEADER ---------- */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title-block h1 {
+      margin: 4px 0 0;
+      font-size: 24px;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      background: #eff6ff;
+      color: #1d4ed8;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #1d4ed8;
+    }
+
+    .title-sub {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 520px;
+    }
+
+    .header-badge {
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+    }
+
+    /* ---------- PANEL PRINCIPAL ---------- */
+    .panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr);
+      gap: 16px;
+    }
+
+    /* ---------- CONTROLES ---------- */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: var(--bg-card-soft);
+      border: 1px solid #e5e7eb;
+    }
+
+    .controls-group {
+      grid-column: span 4;
+      display: flex;
+      gap: 8px;
+    }
+
+    .controls label {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    select,
+    input:not([type="range"]),
+    button {
+      padding: 7px 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: var(--control-bg);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: border 0.15s ease, background 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+    }
+
+    select:focus,
+    input:not([type="range"]):focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+      background: #ffffff;
+    }
+
+    button {
+      border-radius: 999px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    button:hover:not([disabled]) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+      cursor: pointer;
+      background: #ffffff;
+    }
+
+    button:active:not([disabled]) {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    button[disabled] {
+      opacity: 0.55;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    /* botones principales */
+    #play {
+      background: var(--btn-play);
+      border-color: transparent;
+      color: white;
+    }
+    #pause {
+      background: var(--btn-pause);
+      border-color: transparent;
+      color: white;
+    }
+    #shuffle {
+      background: #0ea5e9;
+      border-color: transparent;
+      color: white;
+    }
+    #step,
+    #reset {
+      background: #e5e7eb;
+      color: #111827;
+      border-color: transparent;
+    }
+
+    .controls-actions {
+      grid-column: span 4;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .controls-actions .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .range-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 180px;
+    }
+
+    /* ---------- SLIDER (RANGE) ---------- */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #dbeafe);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.24);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #dbeafe);
+    }
+
+    /* ---------- ÁREA DE BARRAS ---------- */
+    .bars-card {
+      margin-top: 4px;
+      padding: 12px 14px 14px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 12px 26px rgba(148, 163, 184, 0.25);
+    }
+
+    .bars-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+
+    .bars-header-title {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.primary {
+      background: linear-gradient(to top, var(--bar-color), #60a5fa);
+    }
+    .legend-dot.active {
+      background: linear-gradient(to top, var(--highlight-active), #fdba74);
+    }
+    .legend-dot.swap {
+      background: linear-gradient(to top, var(--highlight-swap), #6ee7b7);
+    }
+
+    #bars {
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      height: 300px;
+      border-radius: 14px;
+      padding: 18px 10px 10px;
+      background:
+        linear-gradient(#e5e7eb 1px, transparent 1px),
+        linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+      background-size: 100% 40px, 40px 100%;
+      background-position: bottom;
+      border: 1px solid #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #bars::after {
+      content: "";
+      position: absolute;
+      inset-inline: 10px;
+      bottom: 12px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.6), transparent);
+      pointer-events: none;
+    }
+
+    /* ---------- BARRAS ---------- */
+    .bar {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      font-size: 11px;
+      color: #0f172a;
+      background: linear-gradient(to top, var(--bar-color), #93c5fd);
+      border-radius: 6px 6px 0 0;
+      padding: 6px 2px 4px;
+      box-shadow:
+        0 6px 10px rgba(148, 163, 184, 0.8),
+        0 0 0 1px rgba(148, 163, 184, 0.4);
+      transition:
+        transform 0.16s ease-out,
+        box-shadow 0.16s ease-out,
+        background 0.16s ease-out,
+        border 0.16s ease-out;
+      min-width: 4px;
+      position: relative;
+    }
+
+    .bar:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 10px 18px rgba(148, 163, 184, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.6);
+    }
+
+    .bar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.35), transparent 55%);
+      opacity: 0.5;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .bar.active {
+      border: 2px solid var(--highlight-active);
+      background: linear-gradient(to top, var(--highlight-active), #fed7aa);
+      transform: translateY(-10px);
+      box-shadow:
+        0 14px 24px rgba(249, 115, 22, 0.35),
+        0 0 0 1px rgba(248, 171, 96, 0.9);
+    }
+
+    .bar.swap {
+      border: 2px solid var(--highlight-swap);
+      background: linear-gradient(to top, var(--highlight-swap), #bbf7d0);
+      box-shadow:
+        0 14px 24px rgba(16, 185, 129, 0.35),
+        0 0 0 1px rgba(45, 212, 191, 0.9);
+    }
+
+    /* ---------- NOTA Y FOOTER ---------- */
+    .note {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .note-emoji {
+      margin-top: 2px;
+    }
+    .note strong {
+      color: #111827;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    code {
+      background: #f3f4f6;
+      padding: 2px 5px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border: 1px solid #e5e7eb;
+    }
+
+    pre {
+      background: #f9fafb;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      margin-top: 6px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 900px) {
+      .app {
+        padding: 18px 14px 12px;
+      }
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .controls-group,
+      .controls-actions {
+        grid-column: span 2;
+      }
+      .controls-actions {
+        justify-content: flex-start;
+      }
+      #bars {
+        height: 240px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-badge {
+        align-self: flex-start;
+      }
+      body {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-inner">
+      <header class="app-header">
+        <div class="title-block">
+          <div class="pill">
+            <span class="pill-dot"></span>
+            TP · Algoritmos
+          </div>
+          <h1>Visualizador de ordenamiento</h1>
+          <p class="title-sub">
+            Probá distintos algoritmos y mirá, paso a paso, cómo van reacomodando la lista hasta quedar ordenada.
+          </p>
+        </div>
+        <div class="header-badge">
+          <span class="dot"></span>
+          <span>Python + JS · Visualización en vivo</span>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="controls">
+          <div class="controls-group">
+            <label>Algoritmo
+              <select id="algorithm">
+                <option value="bubble">Bubble sort</option>
+                <option value="selection">Selection sort</option>
+                <option value="insertion">Insertion sort</option>
+              </select>
+            </label>
+
+            <label>Dataset
+              <select id="dataset">
+                <option value="random">Random</option>
+                <option value="preset">Preset</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="controls-group">
+            <label>Cantidad
+              <input id="count" type="number" value="12" min="3" max="60">
+            </label>
+
+            <label>Valor máximo
+              <input id="maxv" type="number" value="100" min="5" max="1000">
+            </label>
+          </div>
+
+          <div class="controls-actions">
+            <div class="btn-row">
+              <button id="shuffle">🔄 Mezclar</button>
+              <button id="step">➡️ Paso</button>
+              <button id="play">▶️ Reproducir</button>
+              <button id="pause">⏸️ Pausar</button>
+              <button id="reset">⏹️ Reset</button>
+            </div>
+
+            <div class="range-wrapper">
+              <span>Velocidad</span>
+              <input id="speed" type="range" min="20" max="1000" value="200">
+              <span>ms</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bars-card">
+          <div class="bars-header">
+            <div class="bars-header-title">
+              Vista de barras (altura = valor numérico)
+            </div>
+            <div class="legend">
+              <span class="legend-item">
+                <span class="legend-dot primary"></span>
+                <span>Elemento</span>
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot active"></span>
+                <span>Comparación</span>
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot swap"></span>
+                <span>Intercambio</span>
+              </span>
+            </div>
+          </div>
+
+          <div id="bars" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <div class="note">
+        <span class="note-emoji">💡</span>
+        <span>
+          <strong>Nota:</strong> este visualizador corre la versión en JavaScript de los algoritmos.
+          Para el TP, asegurate de incluir también tus implementaciones en Python dentro de la carpeta <code>/algorithms/</code>.
+        </span>
+      </div>
+
+      <footer>
+        Ejecutá en la carpeta <code>visualizador/</code>:
+        <pre>python -m http.server
+Abrí luego: http://localhost:8000</pre>
+      </footer>
+    </div>
+  </div>
+
+  <script src="js/visualizer.js"></script>
+</body>
+</html>
