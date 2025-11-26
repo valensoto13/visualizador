@@ -229,7 +229,6 @@
       box-shadow: none;
     }
 
-    /* botones principales */
     #play {
       background: var(--btn-play);
       border-color: transparent;
@@ -276,7 +275,6 @@
       min-width: 180px;
     }
 
-    /* ---------- SLIDER (RANGE) ---------- */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
@@ -305,22 +303,6 @@
       box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.24);
     }
 
-    input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: 2px solid var(--accent);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
-      transition: box-shadow 0.15s ease, transform 0.15s ease;
-    }
-
-    input[type="range"]::-moz-range-track {
-      height: 4px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent), #dbeafe);
-    }
-
     /* ---------- ÁREA DE BARRAS ---------- */
     .bars-card {
       margin-top: 4px;
@@ -334,7 +316,8 @@
     .bars-header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items:
+baseline;
       margin-bottom: 8px;
       gap: 12px;
     }
@@ -402,7 +385,6 @@
       pointer-events: none;
     }
 
-    /* ---------- BARRAS ---------- */
     .bar {
       flex: 1 1 auto;
       display: flex;
@@ -460,7 +442,6 @@
         0 0 0 1px rgba(45, 212, 191, 0.9);
     }
 
-    /* ---------- NOTA Y FOOTER ---------- */
     .note {
       margin-top: 14px;
       font-size: 13px;
@@ -501,7 +482,6 @@
       overflow-x: auto;
     }
 
-    /* ---------- RESPONSIVE ---------- */
     @media (max-width: 900px) {
       .app {
         padding: 18px 14px 12px;
@@ -560,9 +540,12 @@
           <div class="controls-group">
             <label>Algoritmo
               <select id="algorithm">
+
+                <!-- Algoritmos obligatorios -->
                 <option value="bubble">Bubble sort</option>
                 <option value="selection">Selection sort</option>
                 <option value="insertion">Insertion sort</option>
+
               </select>
             </label>
 
@@ -625,20 +608,6 @@
           <div id="bars" aria-live="polite"></div>
         </div>
       </section>
-
-      <div class="note">
-        <span class="note-emoji">💡</span>
-        <span>
-          <strong>Nota:</strong> este visualizador corre la versión en JavaScript de los algoritmos.
-          Para el TP, asegurate de incluir también tus implementaciones en Python dentro de la carpeta <code>/algorithms/</code>.
-        </span>
-      </div>
-
-      <footer>
-        Ejecutá en la carpeta <code>visualizador/</code>:
-        <pre>python -m http.server
-Abrí luego: http://localhost:8000</pre>
-      </footer>
     </div>
   </div>
 

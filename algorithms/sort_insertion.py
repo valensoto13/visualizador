@@ -11,17 +11,22 @@ def init(vals):
     j = 1
 
 def step():
-    global i, j
+    global i, j, n
+
     if n == 0:
         return {"done": True}
+
     if i >= n:
         return {"done": True}
+
+    # Si todavía hay que desplazar hacia la izquierda
     if j > 0 and items[j - 1] > items[j]:
         a, b = j - 1, j
         items[a], items[b] = items[b], items[a]
         j -= 1
         return {"a": a, "b": b, "swap": True, "done": False}
-    else:
-        i += 1
-        j = i
-        return {"a": 0, "b": 0, "swap": False, "done": False}
+
+    # Si este elemento ya está insertado → pasar al siguiente
+    i += 1
+    j = i
+    return {"a": i - 1, "b": j - 1, "swap": False, "done": False}
