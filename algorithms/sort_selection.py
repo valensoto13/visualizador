@@ -4,7 +4,7 @@
 
 items = []
 n = 0
-
+# n = es el largo de la lista
 # i = posición donde colocaremos el próximo mínimo
 # j = cursor que recorre la lista
 # min_idx = posición del valor mínimo encontrado hasta ahora
