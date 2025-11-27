@@ -21,8 +21,8 @@ const STATE = {
   speed: 200     // Velocidad en ms de cada paso
 };
 
-// Copia el arreglo inicial y reinicia estados internos
 function initItems(vals){
+  // Copia el arreglo inicial y reinicia estados internos
   STATE.items = vals.slice();      // copia del arreglo
   STATE.n = STATE.items.length;    // cantidad de elementos
 
@@ -39,15 +39,15 @@ function initItems(vals){
 // Variables internas del bubble sort
 let b_i=0, b_j=0, b_swapped=false;
 
-// Reinicia el algoritmo burbuja
 function bubble_init(){
+  // Reinicia el algoritmo burbuja
   b_i=0;         // Pasada actual
   b_j=0;         // Comparación interna dentro de la pasada
   b_swapped=false; // Si hubo intercambios
 }
 
-// Ejecuta un paso del algoritmo burbuja
 function bubble_step(){
+  // Ejecuta un paso del algoritmo burbuja
   const n = STATE.n;
 
   if(n === 0) return {done:true};        // caso borde
@@ -57,8 +57,8 @@ function bubble_step(){
   if(b_j < n - b_i - 1){
     const a = b_j, b = b_j+1;            // índices comparados
     
-    // Si están desordenados → intercambia
     if(STATE.items[a] > STATE.items[b]){
+      // Si están desordenados → intercambia
       const tmp = STATE.items[a];
       STATE.items[a] = STATE.items[b];
       STATE.items[b] = tmp;
@@ -69,16 +69,17 @@ function bubble_step(){
       return {a,b,swap:true,done:false};
     }
 
-    // No hubo intercambio
     b_j++;
     return {a,b,swap:false,done:false};
 
   } else {
 
-    // Si en una pasada no hubo intercambios → ya está ordenado
-    if(!b_swapped) return {done:true};
+    if(!b_swapped) {
+      // Si en una pasada no hubo intercambios → ya está ordenado
+      return {done:true};
+    }
 
-    // Reiniciar para la próxima pasada
+    // Preparar próxima pasada
     b_swapped=false;
     b_j=0;
     b_i++;
@@ -97,47 +98,44 @@ let s_i=0, s_j=1, s_min=0;
 function selection_init(){
   s_i=0; 
   s_j=1; 
+  // selection_min inicia en 0 (se ajustará al iniciar cada búsqueda)
   s_min=0;      // índice del mínimo encontrado
 }
 
-// Ejecuta un paso del selection sort
 function selection_step(){
+  // Ejecuta un paso del selection sort
   const n = STATE.n;
 
   if(n === 0) return {done:true};
   if(s_i >= n-1) return {done:true};  // ya ordenado
 
-  // Buscando el mínimo
   if(s_j < n){
     const a = s_min, b = s_j;
-
-    // Si encontramos un valor menor → actualizar mínimo
-    if(STATE.items[b] < STATE.items[s_min]) 
-      s_min = b;
+    // Comparación
+    if(STATE.items[s_j] < STATE.items[s_min])
+      s_min = s_j;
 
     s_j++;
-
     return {a,b,swap:false,done:false};
   
   } else {
-    // Terminó la búsqueda, ahora intercambiar si corresponde
     let res;
-
+    
     if(s_min !== s_i){
+      // Intercambio mínimo → posición s_i
       const tmp = STATE.items[s_i];
       STATE.items[s_i] = STATE.items[s_min];
       STATE.items[s_min] = tmp;
 
       res = {a:s_i,b:s_min,swap:true,done:false};
-
     } else {
       // No hubo intercambio
       res = {a:s_i,b:s_i,swap:false,done:false};
     }
 
-    // Avanzamos a la siguiente posición
-    s_i++; 
-    s_j = s_i+1; 
+    // Avanzar externo e iniciar nueva búsqueda
+    s_i++;
+    s_j = s_i + 1;
     s_min = s_i;
 
     return res;
@@ -151,30 +149,27 @@ function selection_step(){
 // Variables internas
 let ins_i=1, ins_j=1;
 
-// Reinicia el algoritmo
 function insertion_init(){
+  // Reinicia el algoritmo
   ins_i=1; 
   ins_j=1;
 }
 
-// Ejecuta un paso del insertion sort
 function insertion_step(){
+  // Ejecuta un paso del insertion sort
   const n = STATE.n;
 
   if(n === 0) return {done:true};
   if(ins_i >= n) return {done:true};
 
-  // Comparación hacia atrás
   if(ins_j > 0 && STATE.items[ins_j-1] > STATE.items[ins_j]){
-    const a = ins_j-1, b = ins_j;
-
+    const a = ins_j - 1, b = ins_j;
     // Intercambio
     const tmp = STATE.items[a]; 
     STATE.items[a] = STATE.items[b]; 
     STATE.items[b] = tmp;
 
     ins_j--;
-
     return {a,b,swap:true,done:false};
 
   } else {
@@ -190,6 +185,7 @@ function insertion_step(){
 ///////////////////////////////////////////
 function render(){
   const container = document.getElementById('bars');
+  if(!container) return;
   container.innerHTML = '';
   const maxv = Math.max(1, ...STATE.items);
 
@@ -197,7 +193,7 @@ function render(){
   STATE.items.forEach(v => {
     const bar = document.createElement('div');
     bar.className = 'bar';
-    bar.style.height = Math.round((v / maxv) * 240) + 'px';
+    bar.style.height = Math.round((v/maxv)*240) + 'px';
     bar.textContent = v;
     container.appendChild(bar);
   });
@@ -209,11 +205,12 @@ function render(){
 function highlight(a,b,swap){
   const bars = document.querySelectorAll('.bar');
 
-  bars.forEach(bx => bx.classList.remove('active','swap'));
+  // Quitar clases previas
+  bars.forEach(bx=>bx.classList.remove('active','swap'));
 
-  if(typeof a === 'number' && typeof b === 'number'){
+  if(typeof a==='number' && typeof b==='number'){
     if(bars[a]) bars[a].classList.add('active');
-    if(bars[b]) bars[b].classList.add('active');
+    if(bars[b]) bars[b].classList.add('active','bar-b');
 
     if(swap){
       if(bars[a]) bars[a].classList.add('swap');
@@ -228,20 +225,19 @@ function highlight(a,b,swap){
 function stepOnce(){
   let res;
 
-  if(STATE.algo === 'bubble') res = bubble_step();
-  else if(STATE.algo === 'selection') res = selection_step();
-  else if(STATE.algo === 'insertion') res = insertion_step();
+  if(STATE.algo==='bubble') res = bubble_step();
+  else if(STATE.algo==='selection') res = selection_step();
+  else if(STATE.algo==='insertion') res = insertion_step();
 
-  // Si ya terminó
   if(res.done){
-    highlight();  // limpiar resaltado
+    highlight(); // limpiar resaltado
     stopPlaying();
     render();
     return;
   }
 
-  render();                          // dibujar con cambios
-  highlight(res.a, res.b, res.swap); // resaltar comparación
+  render();                              
+  highlight(res.a, res.b, res.swap);
 }
 
 ///////////////////////////////////////////
@@ -249,16 +245,18 @@ function stepOnce(){
 ///////////////////////////////////////////
 function play(){
   if(STATE.playing) return;
-  STATE.playing = true;
+  STATE.playing=true;
   STATE.interval = setInterval(stepOnce, STATE.speed);
 }
 
+///////////////////////////////////////////
 // Pausar ejecución
+///////////////////////////////////////////
 function stopPlaying(){
-  STATE.playing = false;
+  STATE.playing=false;
   if(STATE.interval){
     clearInterval(STATE.interval);
-    STATE.interval = null;
+    STATE.interval=null;
   }
 }
 
@@ -273,34 +271,29 @@ function reset(){
   highlight();
 }
 
+///////////////////////////////////////////
 // Genera arreglo según tipo seleccionado
+///////////////////////////////////////////
 function generateValues(){
-  const type = document.getElementById('dataset').value;
-
-  if(type === 'random'){
-    const n = parseInt(document.getElementById('count').value) || 12;
-    const maxv = parseInt(document.getElementById('maxv').value) || 100;
-
-    const arr = [];
-    for(let i=0;i<n;i++) 
-      arr.push(Math.floor(Math.random()*maxv)+1);
-
+  const type = document.getElementById('dataset')?.value;
+  if(type==='random'){
+    const n = parseInt(document.getElementById('count')?.value) || 12;
+    const maxv = parseInt(document.getElementById('maxv')?.value) || 100;
+    const arr=[];
+    for(let i=0;i<n;i++) arr.push(Math.floor(Math.random()*maxv)+1);
     return arr;
-
-  } else if(type === 'preset'){
-    return [5,3,8,1,4,7,2,6];
   }
-
+  if(type==='preset') return [5,3,8,1,4,7,2,6];
   return [];
 }
 
 ///////////////////////////////////////////
 // Conectar botones e inicializar
 ///////////////////////////////////////////
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded',()=>{
 
   // Cambiar algoritmo
-  document.getElementById('algorithm').addEventListener('change', e=>{
+  document.getElementById('algorithm')?.addEventListener('change',e=>{
     STATE.algo = e.target.value;
     if(STATE.algo==='bubble') bubble_init();
     if(STATE.algo==='selection') selection_init();
@@ -308,81 +301,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Botones
-  document.getElementById('shuffle').addEventListener('click', reset);
-  document.getElementById('step').addEventListener('click', stepOnce);
-  document.getElementById('play').addEventListener('click', play);
-  document.getElementById('pause').addEventListener('click', stopPlaying);
-  document.getElementById('reset').addEventListener('click', reset);
+  document.getElementById('shuffle')?.addEventListener('click', reset);
+  document.getElementById('step')?.addEventListener('click', stepOnce);
+  document.getElementById('play')?.addEventListener('click', play);
+  document.getElementById('pause')?.addEventListener('click', stopPlaying);
+  document.getElementById('reset')?.addEventListener('click', reset);
 
   // Control de velocidad
-  document.getElementById('speed').addEventListener('input', e=>{
+  document.getElementById('speed')?.addEventListener('input',e=>{
     STATE.speed = parseInt(e.target.value);
-    if(STATE.playing){ 
+    if(STATE.playing){
       stopPlaying();
       play();
     }
   });
 
-  // Inicializar por primera vez
-  reset();
-});
-
-  }
-  render();
-  highlight(res.a, res.b, res.swap);
-}
-
-function play(){
-  if(STATE.playing) return;
-  STATE.playing = true;
-  STATE.interval = setInterval(stepOnce, STATE.speed);
-}
-
-function stopPlaying(){
-  STATE.playing = false;
-  if(STATE.interval) { clearInterval(STATE.interval); STATE.interval = null; }
-}
-
-function reset(){
-  stopPlaying();
-  const vals = generateValues();
-  initItems(vals);
-  render();
-  highlight();
-}
-
-function generateValues(){
-  const type = document.getElementById('dataset').value;
-  if(type === 'random'){
-    const n = parseInt(document.getElementById('count').value) || 12;
-    const maxv = parseInt(document.getElementById('maxv').value) || 100;
-    const arr = [];
-    for(let i=0;i<n;i++) arr.push(Math.floor(Math.random()*maxv)+1);
-    return arr;
-  } else if(type === 'preset'){
-    return [5,3,8,1,4,7,2,6];
-  }
-  return [];
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Wire controls
-  document.getElementById('algorithm').addEventListener('change', e=>{
-    STATE.algo = e.target.value;
-    if(STATE.algo==='bubble') bubble_init();
-    if(STATE.algo==='selection') selection_init();
-    if(STATE.algo==='insertion') insertion_init();
-  });
-  document.getElementById('shuffle').addEventListener('click', reset);
-  document.getElementById('step').addEventListener('click', stepOnce);
-  document.getElementById('play').addEventListener('click', play);
-  document.getElementById('pause').addEventListener('click', stopPlaying);
-  document.getElementById('reset').addEventListener('click', reset);
-  document.getElementById('speed').addEventListener('input', e=>{
-    STATE.speed = parseInt(e.target.value);
-    if(STATE.playing){ stopPlaying(); play(); }
-  });
-
-  // initial
   reset();
 });
